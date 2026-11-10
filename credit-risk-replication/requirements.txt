@@ -1,0 +1,10 @@
+torch
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+shap
+ucimlrepo
+tab-transformer-pytorch
+pyyaml

@@ -1,0 +1,4 @@
+experiment,split,accuracy,precision_class0,precision_class1,recall_class0,recall_class1,f1_class0,f1_class1,macro_f1,macro_recall,f2_score,roc_auc,confusion_matrix
+A,test,0.74,0.75,0.7391,0.2,0.9714,0.3158,0.8395,0.5776,0.5857,0.5742,0.8148,"[[6, 24], [2, 68]]"
+B,test,0.75,0.5641,0.8689,0.7333,0.7571,0.6377,0.8092,0.7234,0.7452,0.7345,0.8157,"[[22, 8], [17, 53]]"
+C,test,0.75,0.5641,0.8689,0.7333,0.7571,0.6377,0.8092,0.7234,0.7452,0.7345,0.8157,"[[22, 8], [17, 53]]"

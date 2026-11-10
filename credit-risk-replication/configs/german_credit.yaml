@@ -1,0 +1,129 @@
+dataset: german_credit
+source: UCI Statlog German Credit Data (ID 144)
+local_file: data/raw/german.data
+
+# Paper label mapping
+label_mapping:
+  original_good: 1   # UCI original
+  original_bad:  2   # UCI original
+  paper_good:    1   # mapped (class 1)
+  paper_bad:     0   # mapped (class 0)
+
+# Class distribution (full dataset)
+class_distribution:
+  bad_count:  300
+  good_count: 700
+  total:      1000
+
+# Data split (80/10/10 stratified)
+split:
+  train_ratio: 0.80
+  val_ratio:   0.10
+  test_ratio:  0.10
+  stratify:    true
+  random_seed: 42
+
+# Feature configuration
+features:
+  categorical:
+    - checking_status
+    - credit_history
+    - purpose
+    - savings_status
+    - employment
+    - personal_status
+    - other_parties
+    - property_magnitude
+    - other_payment_plans
+    - housing
+    - job
+    - own_telephone
+    - foreign_worker
+  numerical:
+    - duration
+    - credit_amount
+    - installment_commitment
+    - residence_since
+    - age
+    - existing_credits
+    - num_dependents
+
+# Preprocessing
+preprocessing:
+  categorical_encoding: label_encoding_with_unknown_slot
+  unknown_category_index: 0
+  numerical_scaling: MinMaxScaler(-1, 1)
+  imputer: SimpleImputer(median)
+  fit_on: training_data_only
+  note: >
+    The paper mentions one-hot encoding, but TabTransformer uses categorical
+    embeddings (integer IDs). This discrepancy is documented in REPRODUCIBILITY_NOTES.md.
+
+# TabTransformer hyperparameters (from paper Table 4)
+model:
+  architecture: TabTransformer
+  implementation: tab-transformer-pytorch (lucidrains)
+  embedding_dim: 64
+  transformer_depth: 2
+  attention_heads: 2
+  attention_dropout: 0.1
+  ff_dropout: 0.1
+  output_classes: 2
+
+# Training (implementation choices — not fully specified in paper)
+training:
+  optimizer: AdamW
+  learning_rate: 0.001
+  max_epochs: 100
+  batch_size: 64
+  early_stopping: best_val_loss
+  random_seed: 42
+
+# Experiments
+experiments:
+  A:
+    name: "Unweighted Baseline"
+    loss: CrossEntropyLoss
+    class_weights: none
+  B:
+    name: "Weighted (Full Dataset)"
+    loss: CrossEntropyLoss
+    class_weights: "N / N_i from full dataset"
+    note: "Paper's stated weighting procedure"
+  C:
+    name: "Weighted (Train Only)"
+    loss: CrossEntropyLoss
+    class_weights: "N / N_i from training labels only"
+    note: "Conservative approach — avoids using held-out label info"
+
+# Reference targets from paper
+paper_targets:
+  german_credit_unweighted: 0.93
+  german_credit_weighted:   0.95
+
+# Evaluation metrics
+evaluation:
+  metrics:
+    - accuracy
+    - precision_per_class
+    - recall_per_class
+    - f1_per_class
+    - macro_f1
+    - macro_recall
+    - f2_score
+    - confusion_matrix
+    - roc_auc
+  outputs:
+    metrics_csv: outputs/metrics/results.csv
+    confusion_matrices: outputs/plots/
+    roc_curves: outputs/plots/
+    loss_curves: outputs/plots/
+
+# SHAP configuration
+shap:
+  explainer: KernelExplainer
+  background_size: 100
+  n_explain: 50
+  n_individual_plots: 3
+  explained_class: 1  # Good credit probability
+  experiment: B       # Model used for explanation (paper's main model)
